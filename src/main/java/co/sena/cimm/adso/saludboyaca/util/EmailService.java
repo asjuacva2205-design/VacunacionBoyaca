@@ -1,9 +1,7 @@
 package co.sena.cimm.adso.saludboyaca.util;
 
-import jakarta.mail.*;
-import jakarta.mail.internet.*;
-import java.util.Properties;
-
+import java.net.HttpURLConnection;
+import java.net.URL;
 /**
  * EmailService — Servicio de correo electrónico SaludBoyacá Genera correos HTML
  * atractivos con temática de enfermería/vacunación. Configura en
@@ -22,32 +20,33 @@ public class EmailService {
     private static final String APP_URL = System.getenv().getOrDefault("APP_URL", "http://localhost:8080/saludboyaca");
 
     private static void enviar(String destino, String asunto, String cuerpoHTML) {
-        try {
-            Properties props = new Properties();
-            props.put("mail.smtp.auth", "true");
-            props.put("mail.smtp.ssl.enable", "true");  // cambia starttls por ssl
-            props.put("mail.smtp.host", SMTP_HOST);
-            props.put("mail.smtp.port", SMTP_PORT);
+    try {
+        String apiKey = System.getenv("SENDGRID_API_KEY");
+        URL url = new URL("https://api.sendgrid.com/v3/mail/send");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Authorization", "Bearer " + apiKey);
+        conn.setRequestProperty("Content-Type", "application/json");
+        conn.setDoOutput(true);
 
-            Session session = Session.getInstance(props, new Authenticator() {
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(SMTP_USER, SMTP_PASS);
-                }
-            });
+        String json = "{"
+            + "\"personalizations\":[{\"to\":[{\"email\":\"" + destino + "\"}]}],"
+            + "\"from\":{\"email\":\"" + SMTP_USER + "\",\"name\":\"SaludBoyacá\"},"
+            + "\"subject\":\"" + asunto + "\","
+            + "\"content\":[{\"type\":\"text/html\",\"value\":\"" + cuerpoHTML.replace("\"", "\\\"").replace("\n", "") + "\"}]"
+            + "}";
 
-            Message msg = new MimeMessage(session);
-            msg.setFrom(new InternetAddress(SMTP_USER, FROM_NAME));
-            msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(destino));
-            msg.setSubject(asunto);
-            msg.setContent(cuerpoHTML, "text/html; charset=UTF-8");
-
-            Transport.send(msg);
+        conn.getOutputStream().write(json.getBytes("UTF-8"));
+        int code = conn.getResponseCode();
+        if (code == 202) {
             System.out.println("✅ OTP ENVIADO CORRECTAMENTE a: " + destino);
-
-        } catch (Exception e) {
-            System.err.println("❌ Error enviando OTP a " + destino + " → " + e.getMessage());
+        } else {
+            System.err.println("❌ Error SendGrid code: " + code);
         }
+    } catch (Exception e) {
+        System.err.println("❌ Error enviando OTP a " + destino + " → " + e.getMessage());
     }
+}
 
     public enum TipoEmail {
         CITA_NUEVA, CITA_CONFIRMADA, CITA_CANCELADA, CITA_RECHAZADA,
