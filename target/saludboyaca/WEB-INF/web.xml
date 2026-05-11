@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+         https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+         version="6.0">
+
+  <display-name>SaludBoyacá — Sistema de Citas Médicas</display-name>
+  <description>Sistema departamental de gestión de citas médicas - Vacunación Boyacá</description>
+
+  <!-- ══════════════════════════════════════════════════════
+       PÁGINA DE BIENVENIDA → Landing page
+  ══════════════════════════════════════════════════════ -->
+  <welcome-file-list>
+    <welcome-file>landing.jsp</welcome-file>
+  </welcome-file-list>
+
+  <!-- ══════════════════════════════════════════════════════
+       FILTROS
+  ══════════════════════════════════════════════════════ -->
+  <!-- Filtro de Locale (idioma) -->
+  <filter>
+    <filter-name>LocaleFilter</filter-name>
+    <filter-class>co.sena.cimm.adso.saludboyaca.util.LocaleFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>LocaleFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+  <!-- Filtro de autenticación -->
+  <filter>
+    <filter-name>AuthFilter</filter-name>
+    <filter-class>co.sena.cimm.adso.saludboyaca.util.AuthFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>AuthFilter</filter-name>
+    <url-pattern>/dashboard</url-pattern>
+  </filter-mapping>
+  <filter-mapping>
+    <filter-name>AuthFilter</filter-name>
+    <url-pattern>/citas</url-pattern>
+  </filter-mapping>
+  <filter-mapping>
+    <filter-name>AuthFilter</filter-name>
+    <url-pattern>/pacientes</url-pattern>
+  </filter-mapping>
+  <filter-mapping>
+    <filter-name>AuthFilter</filter-name>
+    <url-pattern>/horarios</url-pattern>
+  </filter-mapping>
+  <filter-mapping>
+    <filter-name>AuthFilter</filter-name>
+    <url-pattern>/perfil</url-pattern>
+  </filter-mapping>
+  <filter-mapping>
+    <filter-name>AuthFilter</filter-name>
+    <url-pattern>/admin/*</url-pattern>
+  </filter-mapping>
+
+  <!-- ══════════════════════════════════════════════════════
+       SERVLETS EXPLÍCITOS (complementan anotaciones)
+  ══════════════════════════════════════════════════════ -->
+
+  <!-- Landing / home -->
+  <servlet>
+    <servlet-name>LandingServlet</servlet-name>
+    <jsp-file>/landing.jsp</jsp-file>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>LandingServlet</servlet-name>
+    <url-pattern>/home</url-pattern>
+  </servlet-mapping>
+
+  <!-- ══════════════════════════════════════════════════════
+       CONFIGURACIÓN DE SESIÓN
+  ══════════════════════════════════════════════════════ -->
+  <session-config>
+    <session-timeout>60</session-timeout><!-- minutos -->
+    <cookie-config>
+      <name>SALUDBOYACA_SESSION</name>
+      <http-only>true</http-only>
+      <secure>false</secure><!-- true en producción con HTTPS -->
+    </cookie-config>
+    <tracking-mode>COOKIE</tracking-mode>
+  </session-config>
+
+  <!-- ══════════════════════════════════════════════════════
+       PÁGINAS DE ERROR
+  ══════════════════════════════════════════════════════ -->
+  <error-page>
+    <error-code>403</error-code>
+    <location>/views/error/403.jsp</location>
+  </error-page>
+  <error-page>
+    <error-code>404</error-code>
+    <location>/views/error/404.jsp</location>
+  </error-page>
+  <error-page>
+    <error-code>500</error-code>
+    <location>/views/error/500.jsp</location>
+  </error-page>
+
+  <!-- ══════════════════════════════════════════════════════
+       PARÁMETROS DE CONTEXTO
+  ══════════════════════════════════════════════════════ -->
+  <context-param>
+    <param-name>app.nombre</param-name>
+    <param-value>SaludBoyacá</param-value>
+  </context-param>
+  <context-param>
+    <param-name>app.version</param-name>
+    <param-value>3.0</param-value>
+  </context-param>
+
+</web-app>
